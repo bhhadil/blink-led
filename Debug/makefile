@@ -5,7 +5,7 @@
 
 -include ../makefile.init
 
-RM := rm -rf
+RM := del /F /Q
 
 # All of the sources participating in the build are defined here
 -include sources.mk
@@ -31,8 +31,7 @@ endif
 OPTIONAL_TOOL_DEPS := \
 $(wildcard ../makefile.defs) \
 $(wildcard ../makefile.init) \
-$(wildcard ../makefile.targets) \
-
+$(wildcard ../makefile.targets)
 
 BUILD_ARTIFACT_NAME := test
 BUILD_ARTIFACT_EXTENSION := elf
@@ -41,20 +40,22 @@ BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ART
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-test.elf \
+test.elf
 
 MAP_FILES += \
-test.map \
+test.map
 
 SIZE_OUTPUT += \
-default.size.stdout \
+default.size.stdout
 
 OBJDUMP_LIST += \
-test.list \
+test.list
 
+# Output binary file
+BIN_FILE := $(BUILD_ARTIFACT_NAME).bin
 
 # All Target
-all: main-build
+all: main-build $(BIN_FILE)
 
 # Main-build Target
 main-build: test.elf secondary-outputs
@@ -63,6 +64,11 @@ main-build: test.elf secondary-outputs
 test.elf test.map: $(OBJS) $(USER_OBJS) C:\Users\AHMED\Desktop\test\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-gcc -o "test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\AHMED\Desktop\test\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="test.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
+	@echo ' '
+
+$(BIN_FILE): $(BUILD_ARTIFACT)
+	arm-none-eabi-objcopy -O binary $< $@
+	@echo 'Finished building binary: $@'
 	@echo ' '
 
 default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
@@ -77,7 +83,7 @@ test.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 
 # Other Targets
 clean:
-	-$(RM) default.size.stdout test.elf test.list test.map
+	-$(RM) default.size.stdout test.elf test.list test.map $(BIN_FILE)
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
