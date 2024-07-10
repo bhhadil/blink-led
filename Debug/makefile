@@ -7,6 +7,7 @@
 
 RM := del /F /Q
 RMDIR := rmdir /S /Q
+
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
@@ -83,6 +84,9 @@ test.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 
 # Other Targets
 clean:
+	-$(RMDIR) ./Drivers/STM32F4xx_HAL_Driver/Src
+	-$(RMDIR) ./Core/Startup
+	-$(RMDIR) ./Core/Src
 	-$(RM) default.size.stdout test.elf test.list test.map $(BIN_FILE)
 	-@echo ' '
 
