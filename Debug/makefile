@@ -1,7 +1,5 @@
-################################################################################
 # Automatically-generated file. Do not edit!
 # Toolchain: GNU Tools for STM32 (10.3-2021.10)
-################################################################################
 
 -include ../makefile.init
 
@@ -39,46 +37,58 @@ BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
-# Add inputs and outputs from these tool invocations to the build variables 
-EXECUTABLES += \
-test.elf
-
-MAP_FILES += \
-test.map
-
-SIZE_OUTPUT += \
-default.size.stdout
-
-OBJDUMP_LIST += \
-test.list
-
 # Output binary file
 BIN_FILE := $(BUILD_ARTIFACT_NAME).bin
+
+# Toolchain configuration
+CC := arm-none-eabi-gcc
+OBJCOPY := arm-none-eabi-objcopy
+SIZE := arm-none-eabi-size
+OBJDUMP := arm-none-eabi-objdump
+
+# Compiler and linker flags
+CFLAGS := -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb
+CFLAGS += -Wall -g -std=c11
+CFLAGS += -specs=nosys.specs -specs=nano.specs
+CFLAGS += -ffunction-sections -fdata-sections
+CFLAGS += -DSTM32F407xx
+
+LDFLAGS := -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb
+LDFLAGS += -Wl,-Map=test.map -Wl,--gc-sections
+LDFLAGS += -TSTM32F407VGTX_FLASH.ld
+
+# Source files
+SRCS := $(wildcard Core/Src/*.c) \
+        $(wildcard Core/Startup/*.c) \
+        $(wildcard Drivers/STM32F4xx_HAL_Driver/Src/*.c)
+
+# Object files
+OBJS := $(SRCS:.c=.o)
 
 # All Target
 all: main-build $(BIN_FILE)
 
 # Main-build Target
-main-build: test.elf secondary-outputs
+main-build: $(BUILD_ARTIFACT) secondary-outputs
 
 # Tool invocations
-test.elf test.map: $(OBJS) $(USER_OBJS) C:\Users\AHMED\Desktop\test\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\AHMED\Desktop\test\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="test.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+$(BUILD_ARTIFACT): $(OBJS) $(USER_OBJS) $(LD_DEPS) $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJS) $(USER_OBJS) $(LIBS) -o $(BUILD_ARTIFACT) $(LDFLAGS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 $(BIN_FILE): $(BUILD_ARTIFACT)
-	arm-none-eabi-objcopy -O binary $< $@
+	$(OBJCOPY) -O binary $< $@
 	@echo 'Finished building binary: $@'
 	@echo ' '
 
-default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-size  $(EXECUTABLES)
+default.size.stdout: $(EXECUTABLES) $(SIZE_DEPS)
+	$(SIZE) $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-test.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "test.list"
+test.list: $(EXECUTABLES) $(OBJDUMP_DEPS)
+	$(OBJDUMP) -h -S $(EXECUTABLES) > "test.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
