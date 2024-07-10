@@ -6,7 +6,7 @@
 -include ../makefile.init
 
 RM := del /F /Q
-
+RMDIR := rmdir /S /Q
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
